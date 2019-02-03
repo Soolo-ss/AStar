@@ -5,6 +5,7 @@
 #include "AStarOpen.h"
 #include "AStarOpenByHeap.h"
 #include "AStarNodePool.h"
+#include "JumpPointSearch.h"
 
 #include <vector>
 #include <unordered_map>
@@ -33,13 +34,16 @@ namespace AStar
 		void SetMethod(AStarMethod* method);
 
 		bool Search(Tile& start, Tile& end, std::vector<Tile>& paths, int maxStep = 0);
-		
+	
+	private:
 		void AStarTestNode(Tile& tile, int g, AStarNodeSharedPtr parent, AStarTask& task);
 
+		
 	private:
 		AStarMethod* method_;
 		AStarOpenByHeap openList_;
 		AStarNodePool pools_;
+		JumpPointSearch jumpSearcher_;
 
 		int maxStep_;
 	};

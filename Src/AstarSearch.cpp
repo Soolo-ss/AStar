@@ -32,6 +32,9 @@ namespace AStar
 			openList_.Pop();
 			node->SetState(AStarNodeState::Close);
 
+			jumpSearcher_.GetJumpPoints(node, startNode, end, pools_, method_);
+
+			/*
 			for (int directionIndex = 0; directionIndex != (int)AStarDirection::Max; ++directionIndex)
 			{
 				//Copy, new tile
@@ -40,6 +43,7 @@ namespace AStar
 				tmpOffsetTile.AddDirectionOffset(direction);
 				AStarTestNode(tmpOffsetTile, method_->GetG(node->GetTile(), direction), node, task);
 			}
+			*/
 
 			if (task.endNode != nullptr)
 			{
@@ -117,4 +121,6 @@ namespace AStar
 			break;
 		}
 	}
+
+	
 }

@@ -30,13 +30,13 @@ int main(int argc, char** argv)
 	std::mt19937 rng;
 	std::uniform_int<int> intdist(0, 600);
 
-	uint64_t count = 0;
-	uint64_t alltime = 0;
+	int count = 0;
+	long long alltime = 0;
 
 	auto begin = std::chrono::system_clock::now();
 
-	//for(int i = 0; i != 10000; ++i)
-	while(true)
+	for(int i = 0; i != 10000; ++i)
+	//while(true)
 	{
 		int startX = intdist(rng);
 		int startZ = intdist(rng);
@@ -48,13 +48,19 @@ int main(int argc, char** argv)
 
 		GenerateSearchPath(startX, startZ, endX, endZ, 400, 0, &buffer, &bufferCount);
 		//GenerateSearchPath(0, 0, 10, 0, 400, 0, &buffer, &bufferCount);
+
+		auto end = std::chrono::system_clock::now();
+
+		auto duration = end - begin;//
+		begin = end;
+
+		alltime += duration.count();
+		count++;
 	}
 
-	auto end = std::chrono::system_clock::now();
 
-	auto duration = end - begin;//
 
-	std::cout << duration.count() << std::endl;
+	std::cout << alltime / count<< std::endl;
 
 	return 0;
 }

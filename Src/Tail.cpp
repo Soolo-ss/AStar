@@ -38,4 +38,9 @@ namespace AStar
 			break;
 		}
 	}
+
+	AStarDirection GetFromDirection(Tile parent)
+	{
+		std::pair<int, int> directionNum;
+	}
 }

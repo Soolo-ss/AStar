@@ -21,11 +21,13 @@ namespace AStar
 
 		void AddDirectionOffset(AStarDirection direction);
 
+		AStarDirection GetFromDriection(Tile parent);
+
 		void SetX(int x) { x_ = x; }
 
 		void SetZ(int z) { z_ = z; }
 
-		int GetKey()
+		int GetKey () const
 		{
 			return x_ * 1000 + z_;
 		}

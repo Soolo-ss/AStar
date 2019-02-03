@@ -47,7 +47,7 @@ namespace AStar
 
 	AStarNodeSharedPtr AStarOpen::GetNodeByTile(Tile& tile)
 	{
-		int key = tile.GetX() * 1000 + tile.GetZ();
+		int key = tile.GetKey();
 
 		auto find = pools_.find(key);
 

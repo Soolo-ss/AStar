@@ -79,7 +79,7 @@ namespace AStar
 
 		Tile& GetTile() { return tile_; }
 
-		int GetKey() const { return tile_.GetX() * 1000 + tile_.GetZ(); }
+		int GetKey() const { return tile_.GetKey(); }
 
 	private:
 		int g_;
