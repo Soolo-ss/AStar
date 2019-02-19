@@ -76,6 +76,47 @@ namespace AStar
 		return false;
 	}
 
+	//小心使用
+	//每加1代表右转45度
+	inline AStarDirection RotateDirection(AStarDirection direction, uint32_t degree)
+	{
+		degree = degree % 8;
+
+		int directionIndex = static_cast<int>(direction) + degree;
+
+		if (directionIndex >= 8)
+			directionIndex -= 8;
+
+		return static_cast<AStarDirection>(directionIndex);
+	}
+
+	inline AStarDirection ReverseDirection(AStarDirection direction)
+	{
+		switch (direction)
+		{
+		case AStar::AStarDirection::Up:
+			return AStarDirection::Down;
+		case AStar::AStarDirection::RightUp:
+			return  AStarDirection::LeftDown;
+		case AStar::AStarDirection::Right:
+			return AStarDirection::Left;
+		case AStar::AStarDirection::RightDown:
+			return AStarDirection::LeftUp;
+		case AStar::AStarDirection::Down:
+			return AStarDirection::Up;
+		case AStar::AStarDirection::LeftDown:
+			return AStarDirection::RightUp;
+		case AStar::AStarDirection::Left:
+			return AStarDirection::Right;
+		case AStar::AStarDirection::LeftUp:
+			return AStarDirection::RightDown;
+		default:
+			break;
+		}
+
+		return AStarDirection::None;
+	}
+
 	inline std::pair<AStarDirection, AStarDirection> ResolveDiagonalDirection(AStarDirection direction)
 	{
 		std::pair<AStarDirection, AStarDirection> directions;

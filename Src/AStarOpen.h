@@ -22,7 +22,7 @@ namespace AStar
 
 		void Pop();
 
-		int Count()
+		size_t Count()
 		{
 			return maps_.size();
 		}

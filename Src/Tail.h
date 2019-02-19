@@ -4,6 +4,10 @@
 
 namespace AStar
 {
+	class Tile;
+
+	using AStarTileSharedPtr = std::shared_ptr<Tile>;
+
 	class Tile
 	{
 	public:
@@ -21,8 +25,6 @@ namespace AStar
 
 		void AddDirectionOffset(AStarDirection direction);
 
-		AStarDirection GetFromDriection(Tile parent);
-
 		void SetX(int x) { x_ = x; }
 
 		void SetZ(int z) { z_ = z; }
@@ -32,9 +34,37 @@ namespace AStar
 			return x_ * 1000 + z_;
 		}
 
+		void Copy(AStarTileSharedPtr tile)
+		{
+			x_ = tile->GetX();
+			z_ = tile->GetZ();
+		}
+
+		void Clear()
+		{
+			x_ = 0;
+			z_ = 0;
+		}
+
+		static SmartObjectPool<Tile>& GetPool()
+		{
+			return tilePools_;
+		}
+
+		static AStarTileSharedPtr CreateTileFromDirection(AStarTileSharedPtr current, AStarDirection direction)
+		{
+			AStarTileSharedPtr tile = GetPool().acquire();
+			tile->Copy(current);
+			tile->AddDirectionOffset(direction);
+
+			return tile;
+		}
+
 	private:
 		int x_;
 		int z_;
+
+		static SmartObjectPool<Tile> tilePools_;
 	};
 
 	inline bool operator==(const Tile& lhs, const Tile& rhs)
@@ -54,4 +84,5 @@ namespace AStar
 	{
 		return !(operator==(lhs, rhs));
 	}
+
 }

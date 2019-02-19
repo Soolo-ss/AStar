@@ -20,15 +20,15 @@ namespace AStar
 		AStarNode()
 			: g_(0),
 			  h_(0),
-			  tile_(),
+			  tile_(Tile::GetPool().acquire()),		//defualt acquire from pools
 			  parent_(),
 			  state_(AStarNodeState::Init)
-		{  }
+		{	}
 
-		AStarNode(Tile tile)
+		AStarNode(AStarTileSharedPtr tile)
 			: g_(0), 
 			  h_(0),
-			  tile_(tile),
+			  tile_(tile),					//copy other tile to self
 			  parent_(),
 			  state_(AStarNodeState::Init)
 		{  }
@@ -42,8 +42,15 @@ namespace AStar
 		{
 			parent_.reset();
 			state_ = AStarNodeState::Init;
-			GetTile().SetX(0);
-			GetTile().SetZ(0);
+
+			/*
+			if (tile_ != nullptr)
+			{
+				tile_->SetX(0);
+				tile_->SetZ(0);
+			}
+			*/
+
 			g_ = 0;
 			h_ = 0;
 		}
@@ -77,14 +84,58 @@ namespace AStar
 			}
 		}
 
-		Tile& GetTile() { return tile_; }
+		AStarDirection GetParentDirection() 
+		{
+			if (!parent_.expired())
+			{
+				int subx = this->GetTile()->GetX() - parent_.lock()->GetTile()->GetX();
+				int subz = this->GetTile()->GetZ() - parent_.lock()->GetTile()->GetZ();
 
-		int GetKey() const { return tile_.GetKey(); }
+				if (subz < 0)
+				{
+					if (subx == 0)
+						return AStarDirection::Down;
+					else if (subx < 0)
+						return AStarDirection::LeftDown;
+					else
+						return AStarDirection::RightDown;
+				}
+				else if (subz > 0)
+				{
+					if (subx == 0)
+						return AStarDirection::Up;
+					else if (subx < 0)
+						return AStarDirection::LeftUp;
+					else
+						return AStarDirection::RightUp;
+				}
+				else
+				{
+					if (subx == 0)
+						return AStarDirection::None;
+					else if (subx < 0)
+						return AStarDirection::Left;
+					else
+						return AStarDirection::Right;
+				}
+			}
+
+			return AStarDirection::None;
+		}
+
+		AStarTileSharedPtr GetTile() { return tile_; }
+
+		void SetTile(AStarTileSharedPtr tile)
+		{
+			tile_ = tile;
+		}
+
+		int GetKey() const { return tile_->GetKey(); }
 
 	private:
 		int g_;
 		int h_;
-		Tile tile_;
+		AStarTileSharedPtr tile_;
 		AStarNodeWeakPtr parent_;
 		AStarNodeState state_;
 	};

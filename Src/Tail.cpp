@@ -2,6 +2,8 @@
 
 namespace AStar
 {
+	SmartObjectPool<Tile> Tile::tilePools_;
+
 	void Tile::AddDirectionOffset(AStarDirection direction)
 	{
 		switch (direction)
@@ -37,10 +39,5 @@ namespace AStar
 		default:
 			break;
 		}
-	}
-
-	AStarDirection GetFromDirection(Tile parent)
-	{
-		std::pair<int, int> directionNum;
 	}
 }

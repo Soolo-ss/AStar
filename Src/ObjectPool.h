@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <stack>
+#include <cassert>
 
 namespace AStar
 {
@@ -41,6 +42,8 @@ namespace AStar
 			if (pool_.empty()) {
 				assign();
 			}
+
+			assert(pool_.top() != nullptr);
 
 			ReturnObjectPtrType tmp(pool_.top().release(), ReturnToPoolDeleter{
 				std::weak_ptr<SmartObjectPool<T, D>*>{this_ptr_}

@@ -22,42 +22,17 @@ namespace AStar
 			dense_maps_.set_empty_key(DENSE_HASH_MAP_EMPTY_KEY);
 		}
 
-		AStarNodeSharedPtr GetNodeByKey(AStarNodeKey key)
+		AStarNodeSharedPtr GetNodeByTile(AStarTileSharedPtr tile)
 		{
-			/*
-			auto find = mapping_.find(key);
-
-			if (find == mapping_.end())
-			{
-				AStarNodeSharedPtr node = pools_.acquire();
-				node->Clear();
-				int x = key / 10000;
-				int z = key - x * 10000;
-				node->GetTile().SetX(x);
-				node->GetTile().SetZ(z);
-
-				mapping_.insert(std::make_pair(key, node));
-
-				return node;
-			}
-			else
-			{
-				return find->second;
-			}
-			*/
-				
-			auto find = dense_maps_.find(key);
+			auto find = dense_maps_.find(tile->GetKey());
 
 			if (find == dense_maps_.end())
 			{
 				AStarNodeSharedPtr node = pools_.acquire();
 				node->Clear();
-				int x = key / 1000;
-				int z = key - x * 1000;
-				node->GetTile().SetX(x);
-				node->GetTile().SetZ(z);
+				node->SetTile(tile);
 
-				dense_maps_.insert(std::make_pair(key, node));
+				dense_maps_.insert(std::make_pair(tile->GetKey(), node));
 
 				return node;
 			}
@@ -69,12 +44,7 @@ namespace AStar
 
 		void Clear()
 		{
-			for (auto node : dense_maps_)
-			{
-				node.second->Clear();
-			}
-			//dense_maps_.clear();
-			//mapping_.clear();
+			dense_maps_.clear();
 		}
 
 	private:

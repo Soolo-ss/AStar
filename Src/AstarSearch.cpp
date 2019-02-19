@@ -10,16 +10,17 @@ namespace AStar
 	void AStarSearch::SetMethod(AStarMethod* method)
 	{
 		method_ = method;
+		jumpSearcher_.SetMethod(method);
 	}
 
-	bool AStarSearch::Search(Tile& start, Tile& end, std::vector<Tile>& path, int maxStep)
+	bool AStarSearch::Search(AStarTileSharedPtr start, AStarTileSharedPtr end, std::vector<Tile>& path, int maxStep)
 	{
-		if (start == end)
+		if (*start == *end)
 			return true;
 
 		AStarTask task(start, end);
 
-		AStarNodeSharedPtr startNode = pools_.GetNodeByKey(start.GetKey());
+		AStarNodeSharedPtr startNode = pools_.GetNodeByTile(start);
 		startNode->SetG(0);
 		startNode->SetH(method_->GetH(start, end));
 		startNode->SetState(AStarNodeState::Open);
@@ -32,8 +33,16 @@ namespace AStar
 			openList_.Pop();
 			node->SetState(AStarNodeState::Close);
 
-			jumpSearcher_.GetJumpPoints(node, startNode, end, pools_, method_);
+			AStarDirection parentDirection = node->GetParentDirection();
 
+			std::vector<std::pair<int, AStarTileSharedPtr>> jumpPoints = jumpSearcher_.GetJumpPoints(node->GetTile(), startNode->GetTile(), end, parentDirection);
+
+			for (auto jumpPoint : jumpPoints)
+			{
+				int cost = jumpPoint.first;
+
+				AStarTestNode(jumpPoint.second, cost, node, task);
+			}
 			/*
 			for (int directionIndex = 0; directionIndex != (int)AStarDirection::Max; ++directionIndex)
 			{
@@ -57,11 +66,28 @@ namespace AStar
 		{
 			path.clear();
 
-			for (AStarNodeSharedPtr node = endNode; node != nullptr; node = node->GetParent())
+			Tile tile;
+			for (AStarNodeSharedPtr node = endNode; ; )
 			{
-				path.push_back(node->GetTile());
+				AStarNodeSharedPtr pnode = node->GetParent();
+
+				if (pnode == nullptr)
+					break;
+
+				//get intermediary point
+				std::vector<AStarNodeSharedPtr> internalNodes = GetInternalNodes(node, pnode);
+
+				for (auto internalNode : internalNodes)
+				{
+					tile.SetX(internalNode->GetTile()->GetX());
+					tile.SetZ(internalNode->GetTile()->GetZ());
+					path.push_back(tile);
+				}
+
+				node = pnode;
 			}
 
+			path.push_back(*startNode->GetTile());
 			std::reverse(path.begin(), path.end());
 		}
 
@@ -72,8 +98,101 @@ namespace AStar
 		return true;
 	}
 
-	void AStarSearch::AStarTestNode(Tile& tile, int g, AStarNodeSharedPtr parent, AStarTask& task)
+	std::vector<AStarNodeSharedPtr> AStarSearch::GetInternalNodes(AStarNodeSharedPtr start, AStarNodeSharedPtr end)
 	{
+		AStarTileSharedPtr startTile = start->GetTile();
+		AStarTileSharedPtr endTile = end->GetTile();
+
+		std::vector<AStarNodeSharedPtr> internalNodes;
+
+		if (*startTile == *endTile)
+			return internalNodes;
+
+		int subx = endTile->GetX() - startTile->GetX();
+		int subz = endTile->GetZ() - startTile->GetZ();
+
+		AStarDirection direction = AStarDirection::None;
+		int distance = 0;
+
+		if (subx == 0)
+		{
+			distance = labs(subz);
+			if (subz > 0)
+				direction = AStarDirection::Up;
+			else
+				direction = AStarDirection::Down;
+		}
+		else if (subx < 0)
+		{
+			distance = labs(subx);
+			if (subz == 0)
+				direction = AStarDirection::Left;
+			else if (subz < 0)
+				direction = AStarDirection::LeftDown;
+			else
+				direction = AStarDirection::LeftUp;
+		}
+		else if (subx > 0)
+		{
+			distance = labs(subx);
+
+			if (subz == 0)
+				direction = AStarDirection::Right;
+			else if (subz < 0)
+				direction = AStarDirection::RightDown;
+			else
+				direction = AStarDirection::RightUp;
+		}
+
+		AStarTileSharedPtr tile = Tile::GetPool().acquire();
+		tile->Copy(start->GetTile());
+
+		for (int i = 0; i != distance; ++i)
+		{
+			AStarTileSharedPtr nextTile = Tile::GetPool().acquire();
+			nextTile->Copy(tile);
+			tile->AddDirectionOffset(direction);
+			AStarNodeSharedPtr node = pools_.GetNodeByTile(nextTile);
+
+			internalNodes.push_back(node);
+		}
+
+		return internalNodes;
+	}
+		
+	void AStarSearch::AStarTestNode(AStarTileSharedPtr tile, int g, AStarNodeSharedPtr parent, AStarTask& task)
+	{
+		AStarNodeSharedPtr node = pools_.GetNodeByTile(tile);
+
+		int newG = parent->GetG() + g;
+
+		switch (node->GetState())
+		{
+		case AStarNodeState::Init:
+			node->SetG(newG);
+			node->SetH(method_->GetH(tile, task.endTile));
+			node->SetParent(parent);
+			node->SetState(AStarNodeState::Open);
+			openList_.Push(node);
+
+			if (*tile == *task.endTile)
+			{
+				task.endNode = node;
+			}
+			break;
+		case AStarNodeState::Open:
+			if (node->GetG() > newG)
+			{
+				node->SetG(newG);
+				node->SetParent(parent);
+			}
+			break;
+		case AStarNodeState::Close:
+			break;
+		default:
+			break;
+		}
+		/*
 		if (!method_->CanMove(parent->GetTile(), tile))
 		{
 			return;
@@ -98,7 +217,7 @@ namespace AStar
 		{
 		case AStarNodeState::Init:
 			node->SetG(newG);
-			node->SetH(method_->GetH(tile, task.endTile));
+			node->SetH(method_->GetH(tile, *task.endTile));
 			node->SetParent(parent);
 			node->SetState(AStarNodeState::Open);
 			openList_.Push(node);
@@ -120,6 +239,7 @@ namespace AStar
 		default:
 			break;
 		}
+		*/
 	}
 
 	

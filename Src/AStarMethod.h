@@ -13,33 +13,48 @@ namespace AStar
 	public:
 		virtual ~AStarMethod() { }
 		
-		virtual int GetG(Tile& point, AStarDirection direction) = 0;
-		virtual int GetH(Tile& point, Tile& target) = 0;
+		virtual int GetG(AStarTileSharedPtr point, AStarDirection direction) = 0;
+		virtual int GetH(AStarTileSharedPtr point, AStarTileSharedPtr target) = 0;
 		virtual int GetGOnTurn() = 0;
-		virtual bool CanMove(Tile& point, Tile& next) = 0;
+		virtual bool CanMove(AStarTileSharedPtr point) = 0;
+		virtual bool CanMove(AStarTileSharedPtr point, AStarDirection direction) = 0;
+		virtual bool isExist(AStarTileSharedPtr point) = 0;
+		virtual bool isExist(AStarTileSharedPtr point, AStarDirection direction) = 0;
 	};
 
 	class SearchPathMethod : public AStarMethod
 	{
 	public:
-		int GetG(Tile& point, AStarDirection direction) final;
+		int GetG(AStarTileSharedPtr point, AStarDirection direction) final;
 
-		int GetH(Tile& point, Tile& target) final;
+		int GetH(AStarTileSharedPtr point, AStarTileSharedPtr target) final;
 
 		int GetGOnTurn() final;
 
-		bool CanMove(Tile& point, Tile& next) final;
+		bool CanMove(AStarTileSharedPtr point) final;
+
+		bool CanMove(AStarTileSharedPtr point, AStarDirection direction) final;
+
+		bool isExist(AStarTileSharedPtr point) final;
+
+		bool isExist(AStarTileSharedPtr point, AStarDirection direction) final;
 	};
 
 	class SearchGuildPathMethod : public AStarMethod
 	{
 	public:
-		int GetG(Tile& point, AStarDirection direction) final;
+		int GetG(AStarTileSharedPtr point, AStarDirection direction) final;
 
-		int GetH(Tile& point, Tile& target) final;
+		int GetH(AStarTileSharedPtr point, AStarTileSharedPtr target) final;
 
 		int GetGOnTurn() final;
 
-		bool CanMove(Tile& point, Tile& next) final;
+		bool CanMove(AStarTileSharedPtr point) final;
+
+		bool CanMove(AStarTileSharedPtr point, AStarDirection direction) final;
+
+		bool isExist(AStarTileSharedPtr point) final;
+
+		bool isExist(AStarTileSharedPtr point, AStarDirection direction) final;
 	};
 }

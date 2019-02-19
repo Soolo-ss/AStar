@@ -42,7 +42,7 @@ namespace AStar
 				return nullptr;
 		}
 
-		int Count()
+		size_t Count()
 		{
 			return heap_.size();
 		}

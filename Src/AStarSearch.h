@@ -15,13 +15,13 @@ namespace AStar
 	class AStarTask
 	{
 	public:
-		AStarTask(Tile start, Tile end)
+		AStarTask(AStarTileSharedPtr start, AStarTileSharedPtr end)
 			: startTile(start), endTile(end), endNode(nullptr)
 		{  }
 
 	public:
-		Tile startTile;
-		Tile endTile;
+		AStarTileSharedPtr startTile;
+		AStarTileSharedPtr endTile;
 		AStarNodeSharedPtr endNode;
 	};
 
@@ -33,11 +33,12 @@ namespace AStar
 
 		void SetMethod(AStarMethod* method);
 
-		bool Search(Tile& start, Tile& end, std::vector<Tile>& paths, int maxStep = 0);
+		bool Search(AStarTileSharedPtr start, AStarTileSharedPtr end, std::vector<Tile>& paths, int maxStep = 0);
 	
 	private:
-		void AStarTestNode(Tile& tile, int g, AStarNodeSharedPtr parent, AStarTask& task);
+		void AStarTestNode(AStarTileSharedPtr tile, int g, AStarNodeSharedPtr parent, AStarTask& task);
 
+		std::vector<AStarNodeSharedPtr> GetInternalNodes(AStarNodeSharedPtr start, AStarNodeSharedPtr end);
 		
 	private:
 		AStarMethod* method_;
